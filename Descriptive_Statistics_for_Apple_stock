@@ -1,0 +1,60 @@
+clear; 
+clc; 
+
+disp('Descriptive statistics of the Apple stock returns');
+
+[price_daily] = readmatrix('Apple_daily_prices.xlsx');
+[price_weekly] = readmatrix('Apple_weekly_prices.xlsx');
+[price_monthly] = readmatrix('Apple_monthly_prices.xlsx');
+
+adj_close_daily = price_daily(:,6);
+adj_close_weekly = price_weekly(:,6);
+adj_close_monthly = price_monthly(:,6);
+
+logreturns_daily = log(adj_close_daily(2:end,:))-log(adj_close_daily(1:end-1,:));
+logreturns_weekly = log(adj_close_weekly(2:end,:))-log(adj_close_weekly(1:end-1,:));
+logreturns_monthly = log(adj_close_monthly(2:end,:))-log(adj_close_monthly(1:end-1,:));
+
+% mean of different indices
+mean_daily_returns = mean(logreturns_daily);
+mean_weekly_returns = mean(logreturns_weekly);
+mean_monthly_returns = mean(logreturns_monthly);
+matrix_of_mean = [mean_daily_returns,mean_weekly_returns,mean_monthly_returns];
+% std of different indices
+std_daily_returns = std(logreturns_daily);
+std_weekly_returns = std(logreturns_weekly);
+std_monthly_returns = std(logreturns_monthly);
+matrix_of_std = [std_daily_returns,std_weekly_returns,std_monthly_returns];
+% skewness of different indices
+skewness_daily_returns = skewness(logreturns_daily);
+skewness_weekly_returns = skewness(logreturns_weekly);
+skewness_monthly_returns = skewness(logreturns_monthly);
+matrix_of_skewness = [skewness_daily_returns,skewness_weekly_returns,skewness_monthly_returns];
+% kurtosis of different indices
+kurtosis_daily_returns = kurtosis(logreturns_daily);
+kurtosis_weekly_returns = kurtosis(logreturns_weekly);
+kurtosis_monthly_returns = kurtosis(logreturns_monthly);
+matrix_of_kurtosis = [kurtosis_daily_returns,kurtosis_weekly_returns,kurtosis_monthly_returns];
+% J-B stat
+[~,Stat_daily, pval_daily] = jbtest(logreturns_daily);
+[~,Stat_weekly, pval_weekly] = jbtest(logreturns_weekly);
+[~,Stat_monthly, pval_monthly] = jbtest(logreturns_monthly);
+matrix_of_jb_stat = [Stat_daily,Stat_weekly,Stat_monthly];
+matrix_of_pval = [pval_daily,pval_weekly,pval_monthly];
+
+
+total_matrix = vertcat(matrix_of_mean, matrix_of_std, matrix_of_skewness, matrix_of_kurtosis,matrix_of_jb_stat,matrix_of_pval);
+indices ={'daily returns', 'weekly returns', 'monthly returns'};
+
+% display the outcome
+disp('--------------------------------------------------------------');
+disp('              Mean    Std.Dev. Skewness Kurtosis J-B p-value J-B stat');
+disp('--------------------------------------------------------------');
+
+for i = 1:3 
+    fprintf('%9s %8.3f %8.3f %8.3f %8.3f %8.2f %8.3f \n', ...
+        indices{i}, total_matrix(1,i), total_matrix(2,i), total_matrix(3,i), ...
+        total_matrix(4,i), total_matrix(5,i), total_matrix(6,i));
+end
+
+
